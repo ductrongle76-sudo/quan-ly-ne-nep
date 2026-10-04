@@ -42,14 +42,23 @@ if upload_img is not None:
     
     if st.button("🔍 Nhận diện vi phạm"):
         with st.spinner('AI đang phân tích...'):
+            # --- ĐOẠN ĐÃ SỬA LỖI MÀU ---
             img_array = np.array(image)
-            if img_array.shape[-1] == 4:
-                img_array = cv2.cvtColor(img_array, cv2.COLOR_RGBA2RGB)
+            # Chuyển từ RGB (của Web) sang BGR (chuẩn của AI YOLO)
+            if len(img_array.shape) == 3 and img_array.shape[-1] == 4:
+                img_bgr = cv2.cvtColor(img_array, cv2.COLOR_RGBA2BGR)
+            else:
+                img_bgr = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
                 
-            results = model.predict(source=img_array, conf=conf_threshold)
+            # Đưa ảnh đúng màu cho AI chạy
+            results = model.predict(source=img_bgr, conf=conf_threshold)
             
+            # AI trả về kết quả là ảnh BGR
             res_plotted = results[0].plot()
+            
+            # Chuyển ngược lại BGR sang RGB để Web hiển thị đúng màu
             res_rgb = cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB)
+            # ---------------------------
             
             st.success("Hoàn tất phân tích!")
             st.image(res_rgb, caption="Kết quả nhận diện", width=600)
