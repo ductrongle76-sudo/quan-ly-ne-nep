@@ -3,16 +3,23 @@ from ultralytics import YOLO
 import cv2
 import numpy as np
 from PIL import Image
+import os
+import urllib.request
 
 # 1. Cấu hình giao diện web
 st.set_page_config(page_title="Quản lý Nề nếp", page_icon="🏫")
 st.title("🏫 HỆ THỐNG QUẢN LÝ NỀ NẾP TÁC PHONG")
 st.markdown("Ứng dụng AI nhận diện: **Đồng phục, Đầu tóc, Giày dép**.")
 
-# 2. Load mô hình YOLO11 (chạy 1 lần cho mượt)
+# 2. Load mô hình YOLO11 (tự động tải file best.pt từ GitHub nếu chưa có)
 @st.cache_resource
 def load_model():
-    return YOLO("best.pt")
+    model_path = "best.pt"
+    if not os.path.exists(model_path):
+        # Đây chính là đường link bạn vừa copy
+        url = "https://github.com/ductrongle76-sudo/quan-ly-ne-nep/releases/download/v1.0/best.pt"
+        urllib.request.urlretrieve(url, model_path)
+    return YOLO(model_path)
 
 model = load_model()
 
@@ -32,20 +39,17 @@ else:
 if upload_img is not None:
     image = Image.open(upload_img)
     st.image(image, caption="Ảnh gốc", width=400)
-
+    
     if st.button("🔍 Nhận diện vi phạm"):
         with st.spinner('AI đang phân tích...'):
-            # Chuyển ảnh sang định dạng YOLO đọc được
             img_array = np.array(image)
-            if img_array.shape[-1] == 4: # Nếu là ảnh đuôi PNG có nền trong suốt
+            if img_array.shape[-1] == 4:
                 img_array = cv2.cvtColor(img_array, cv2.COLOR_RGBA2RGB)
-
-            # Chạy AI
+                
             results = model.predict(source=img_array, conf=conf_threshold)
-
-            # Vẽ khung kết quả
+            
             res_plotted = results[0].plot()
             res_rgb = cv2.cvtColor(res_plotted, cv2.COLOR_BGR2RGB)
-
+            
             st.success("Hoàn tất phân tích!")
             st.image(res_rgb, caption="Kết quả nhận diện", width=600)
