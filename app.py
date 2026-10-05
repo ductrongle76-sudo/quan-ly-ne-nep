@@ -14,10 +14,10 @@ st.markdown("Ứng dụng AI nhận diện: **Đồng phục, Đầu tóc, Giày
 # 2. Load mô hình YOLO11 (tự động tải file best.pt từ GitHub nếu chưa có)
 @st.cache_resource
 def load_model():
-    model_path = "best.pt"
+    model_path = "best_v2.pt"
     if not os.path.exists(model_path):
         # Đây chính là đường link bạn vừa copy
-        url = "https://github.com/ductrongle76-sudo/quan-ly-ne-nep/releases/download/v1.0/best.pt"
+        url = "https://github.com/ductrongle76-sudo/quan-ly-ne-nep/releases/download/v1.1/best.pt"
         urllib.request.urlretrieve(url, model_path)
     return YOLO(model_path)
 
